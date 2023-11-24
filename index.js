@@ -29,8 +29,15 @@ async function run() {
 
     // =======================all collections ==========================================
     const userCollection = client.db("gadgetDb").collection("users");
-
+    const featuredProductsCollection = client
+      .db("gadgetDb")
+      .collection("featuredProducts");
     // =================================================================
+    // =========================Products related api========================================
+    app.get("/featuredProducts", async (req, res) => {
+      const result = await featuredProductsCollection.find().toArray();
+      res.send(result);
+    });
 
     // =======================user related api==========================================
     app.post("/users", async (req, res) => {
