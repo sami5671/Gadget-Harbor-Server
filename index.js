@@ -32,6 +32,7 @@ async function run() {
     const featuredProductsCollection = client
       .db("gadgetDb")
       .collection("featuredProducts");
+    const reviewCollection = client.db("gadgetDb").collection("reviews");
     // =================================================================
     // =========================Products related api========================================
     app.get("/featuredProducts", async (req, res) => {
@@ -42,6 +43,11 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await featuredProductsCollection.findOne(query);
+      res.send(result);
+    });
+    app.post("/reviews", async (req, res) => {
+      const item = req.body;
+      const result = await reviewCollection.insertOne(item);
       res.send(result);
     });
     // =======================user related api==========================================
