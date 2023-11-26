@@ -33,6 +33,13 @@ async function run() {
       .db("gadgetDb")
       .collection("featuredProducts");
     const reviewCollection = client.db("gadgetDb").collection("reviews");
+    const trendingProductsCollection = client
+      .db("gadgetDb")
+      .collection("trendingProducts");
+
+    const userAddedCollection = client
+      .db("gadgetDb")
+      .collection("userAddedProduct");
     // =================================================================
     // =========================Products related api========================================
     app.get("/featuredProducts", async (req, res) => {
@@ -45,9 +52,39 @@ async function run() {
       const result = await featuredProductsCollection.findOne(query);
       res.send(result);
     });
+    app.patch("/featuredProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateFeaturedProduct = req.body;
+      // console.log(updatedBooking);
+
+      const updateDoc = {
+        $set: {
+          ProductName: updateFeaturedProduct.name,
+          ProductImage: updateFeaturedProduct.image,
+          ProductTags: updateFeaturedProduct.tags,
+          ProductCardId: updateFeaturedProduct._id,
+          votes: updateFeaturedProduct.votesUp,
+        },
+      };
+      const result = await featuredProductsCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      res.send(result);
+    });
+    // app.post("/trendingProducts", async (req, res) => {
+    //   const item = req.body;
+    //   const result = await trendingProductsCollection.insertOne(item);
+    //   res.send(result);
+    // });
     app.post("/reviews", async (req, res) => {
       const item = req.body;
       const result = await reviewCollection.insertOne(item);
+      res.send(result);
+    });
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollection.find().toArray();
       res.send(result);
     });
     // =======================user related api==========================================
@@ -59,6 +96,16 @@ async function run() {
         return res.send({ message: "User already exists", insertedId: null });
       }
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.post("/userAddedProduct", async (req, res) => {
+      const item = req.body;
+      const result = await userAddedCollection.insertOne(item);
+      res.send(result);
+    });
+    app.get("/userAddedProduct", async (req, res) => {
+      const result = await userAddedCollection.find().toArray();
       res.send(result);
     });
     // =================================================================
