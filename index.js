@@ -105,9 +105,19 @@ async function run() {
       res.send(result);
     });
     app.get("/userAddedProduct", async (req, res) => {
-      const result = await userAddedCollection.find().toArray();
+      const email = req.query.email;
+      const query = { ProductOwnerEmail: email };
+      // console.log(email);
+      // let query = {};
+      // if (req.query.email) {
+      //   query = { ProductOwnerEmail: email };
+      // }
+      // console.log(query);
+      const result = await userAddedCollection.find(query).toArray();
+      console.log(result);
       res.send(result);
     });
+
     app.get("/userAddedProduct/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
