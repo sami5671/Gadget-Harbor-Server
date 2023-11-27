@@ -108,6 +108,34 @@ async function run() {
       const result = await userAddedCollection.find().toArray();
       res.send(result);
     });
+    app.get("/userAddedProduct/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userAddedCollection.findOne(query);
+      res.send(result);
+    });
+    app.patch("/userUpdateProduct/:id", async (req, res) => {
+      const item = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          ProductName: item.ProductName,
+          ProductPhoto: item.ProductPhoto,
+          ProductDescription: item.ProductDescription,
+          ProductTag: item.ProductTag,
+          ProductExternalLink: item.ProductExternalLink,
+        },
+      };
+      const result = await userAddedCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.delete("/userDeleteProduct/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userAddedCollection.deleteOne(query);
+      res.send(result);
+    });
     // =================================================================
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
