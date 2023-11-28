@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
@@ -40,7 +41,16 @@ async function run() {
     const userAddedCollection = client
       .db("gadgetDb")
       .collection("userAddedProduct");
-    // =================================================================
+    // ============================Middlewares=====================================
+
+    // ======================JWT related API===========================================
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
     // =========================Products related api========================================
     app.get("/featuredProducts", async (req, res) => {
       const result = await featuredProductsCollection.find().toArray();
@@ -99,6 +109,7 @@ async function run() {
       res.send(result);
     });
     app.get("/users", async (req, res) => {
+      // console.log(req.headers);
       const result = await userCollection.find().toArray();
       res.send(result);
     });
