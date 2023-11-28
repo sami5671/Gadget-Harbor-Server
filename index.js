@@ -68,6 +68,17 @@ async function run() {
       }
       next();
     };
+    // moderator
+    const verifyModerator = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isModerator = user?.role === "moderator";
+      if (!isModerator) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
+    };
     // ======================JWT related API===========================================
     app.post("/jwt", async (req, res) => {
       const user = req.body;
@@ -151,6 +162,24 @@ async function run() {
       }
       res.send({ admin });
     });
+    app.get("/users", verifyToken, verifyModerator, async (req, res) => {
+      // console.log(req.headers);
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+    app.get("/users/moderator/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: "unauthorized access" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let moderator = false;
+      if (user) {
+        moderator = user?.role == "moderator";
+      }
+      res.send({ moderator });
+    });
     app.delete("/user/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -181,12 +210,21 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
-    // =================================================================
+    // ================================Products os users=================================
     app.post("/userAddedProduct", async (req, res) => {
       const item = req.body;
       const result = await userAddedCollection.insertOne(item);
       res.send(result);
     });
+    app.get(
+      "/userAddedProduct",
+      verifyToken,
+      verifyModerator,
+      async (req, res) => {
+        result = await userAddedCollection.find().toArray();
+        res.send(result);
+      }
+    );
     app.get("/userAddedProduct", async (req, res) => {
       const email = req.query.email;
       const query = { ProductOwnerEmail: email };
